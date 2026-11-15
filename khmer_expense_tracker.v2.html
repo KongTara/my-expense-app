@@ -1,0 +1,2978 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#059669">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="កត់ត្រាប្រាក់">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>កត់ត្រាចំណូល-ចំណាយប្រចាំថ្ងៃ</title>
+
+    <!-- Dynamic PWA Manifest & SVG App Icon នឹងត្រូវភ្ជាប់ដោយ JavaScript -->
+    <link id="pwa-manifest" rel="manifest" href="">
+    <link id="pwa-apple-icon" rel="apple-touch-icon" href="">
+
+    <style>
+        /* ==========================================================================
+           100% PURE OFFLINE CSS (មិនពឹងផ្អែកលើ External CDN ដើម្បីធានា Offline 100%)
+           ========================================================================== */
+        :root {
+            --primary: #059669;
+            --primary-dark: #047857;
+            --primary-light: #d1fae5;
+            --income: #10b981;
+            --income-bg: #ecfdf5;
+            --expense: #ef4444;
+            --expense-bg: #fef2f2;
+            --bg-body: #e2e8f0;
+            --bg-app: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius-xl: 20px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+            --shadow-lg: 0 10px 25px rgba(5, 150, 105, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Kantumruy Pro', 'Battambang', 'Khmer OS Content', 'Khmer OS System', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            overscroll-behavior-y: contain;
+            line-height: 1.5;
+        }
+
+        /* ស៊ុមទូរសព្ទដៃ (Mobile Container) */
+        .app-shell {
+            max-width: 480px;
+            min-height: 100dvh;
+            margin: 0 auto;
+            background-color: var(--bg-app);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.12);
+            padding-bottom: calc(88px + env(safe-area-inset-bottom));
+        }
+
+        /* ផ្នែក Header & Balance Card */
+        .app-header {
+            background: linear-gradient(135deg, #059669 0%, #0d9488 55%, #047857 100%);
+            color: #ffffff;
+            padding: calc(18px + env(safe-area-inset-top)) 18px 26px;
+            border-bottom-left-radius: 28px;
+            border-bottom-right-radius: 28px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.2);
+        }
+
+        .header-circle-1 {
+            position: absolute;
+            top: -45px;
+            right: -35px;
+            width: 140px;
+            height: 140px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .brand-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-title {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+        }
+
+        .offline-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: #d1fae5;
+        }
+
+        .offline-dot {
+            width: 7px;
+            height: 7px;
+            background: #6ee7b7;
+            border-radius: 50%;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pill-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: transform 0.15s, background 0.15s;
+            min-height: 38px;
+        }
+
+        .pill-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .icon-btn-header {
+            width: 38px;
+            height: 38px;
+            padding: 0;
+            justify-content: center;
+        }
+
+        /* កាតសមតុល្យសរុប */
+        .balance-card {
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 18px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .balance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #d1fae5;
+            margin-bottom: 4px;
+        }
+
+        .period-tag {
+            background: rgba(0, 0, 0, 0.22);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .balance-main {
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1.25;
+            word-break: break-all;
+        }
+
+        .balance-sub {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.88);
+            margin-top: 2px;
+        }
+
+        /* ប្រអប់ចំណូល និង ចំណាយ */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .summary-box {
+            background: #ffffff;
+            color: var(--text-main);
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .summary-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .summary-icon.inc { background: var(--income-bg); color: var(--income); }
+        .summary-icon.exp { background: var(--expense-bg); color: var(--expense); }
+
+        .summary-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .summary-val {
+            font-size: 14px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .summary-val.inc { color: var(--primary); }
+        .summary-val.exp { color: var(--expense); }
+
+        /* ផ្នែកមាតិកាតាម Tab */
+        .tab-view {
+            display: none;
+            padding: 14px 16px;
+            flex: 1;
+        }
+
+        .tab-view.active {
+            display: block;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        /* កាតទូទៅ */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 14px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* របារភាគរយ */
+        .ratio-bar {
+            width: 100%;
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 99px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .ratio-inc { background: var(--income); height: 100%; transition: width 0.4s ease; }
+        .ratio-exp { background: var(--expense); height: 100%; transition: width 0.4s ease; }
+
+        .ratio-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        /* តម្រង និង ប្រអប់ស្វែងរក */
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .input-control {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            font-size: 14px;
+            background: #ffffff;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.2s;
+            min-height: 44px;
+        }
+
+        .input-control:focus {
+            border-color: var(--primary);
+        }
+
+        .segmented-control {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            background: #e2e8f0;
+            padding: 4px;
+            border-radius: 14px;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .seg-btn {
+            border: none;
+            background: transparent;
+            padding: 9px 6px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .seg-btn.active {
+            background: #ffffff;
+            color: var(--text-main);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-outline-sm {
+            background: #ffffff;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 0 12px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        /* បញ្ជីប្រតិបត្តិការ */
+        .tx-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .tx-item {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 13px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.15s;
+        }
+
+        .tx-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .tx-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 20px;
+        }
+
+        .tx-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .tx-cat {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tx-note {
+            font-size: 12px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tx-date {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        .tx-right {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .tx-amount {
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .tx-amount.inc { color: var(--primary); }
+        .tx-amount.exp { color: var(--expense); }
+
+        .tx-sub-amount {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-top: -4px;
+        }
+
+        .tx-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .action-mini-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            border: none;
+            background: #f1f5f9;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .action-mini-btn.edit:active { background: #fef3c7; color: #d97706; }
+        .action-mini-btn.del:active { background: #fee2e2; color: #dc2626; }
+
+        /* ==========================================================================
+           BOTTOM NAVIGATION BAR & FLOATING ACTION BUTTON (+)
+           ========================================================================== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            height: calc(68px + env(safe-area-inset-bottom));
+            padding-bottom: env(safe-area-inset-bottom);
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: 1fr 1fr 70px 1fr 1fr;
+            align-items: center;
+            z-index: 40;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        /* ==========================================================================
+           MONTHLY REPORT & YEARLY CHART STYLES
+           ========================================================================== */
+        .year-chart-wrap {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 4px;
+            align-items: flex-end;
+            height: 150px;
+            padding: 12px 4px 4px;
+            border-bottom: 1.5px solid var(--border);
+            margin-bottom: 8px;
+        }
+
+        .month-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-end;
+            cursor: pointer;
+            border-radius: 6px;
+            padding: 2px 1px;
+            transition: background 0.15s;
+        }
+
+        .month-col:hover, .month-col.selected {
+            background: #ecfdf5;
+        }
+
+        .bars-pair {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 118px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .bar-inc, .bar-exp {
+            width: 6px;
+            border-radius: 3px 3px 0 0;
+            min-height: 2px;
+            transition: height 0.35s ease;
+        }
+
+        .bar-inc { background: var(--income); }
+        .bar-exp { background: var(--expense); }
+
+        .month-col-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-top: 5px;
+            white-space: nowrap;
+        }
+
+        .month-col.selected .month-col-label {
+            color: var(--primary-dark);
+            font-weight: 800;
+        }
+
+        .monthly-row-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 12px 14px;
+            margin-bottom: 9px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            cursor: pointer;
+            transition: border-color 0.15s, transform 0.1s;
+        }
+
+        .monthly-row-card:active {
+            transform: scale(0.99);
+            border-color: var(--primary);
+        }
+
+        .monthly-row-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .monthly-row-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            background: #f8fafc;
+            padding: 8px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            height: 100%;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .fab-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .fab-btn {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            border: 4px solid #ffffff;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -36px;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+
+        .fab-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* ==========================================================================
+           MODALS & BOTTOM SHEETS
+           ========================================================================== */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(3px);
+            z-index: 60;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .modal-backdrop.open {
+            display: flex;
+        }
+
+        .modal-backdrop.center {
+            align-items: center;
+            padding: 16px;
+        }
+
+        .bottom-sheet {
+            background: #ffffff;
+            width: 100%;
+            max-width: 480px;
+            border-top-left-radius: 26px;
+            border-top-right-radius: 26px;
+            padding: 20px 18px calc(24px + env(safe-area-inset-bottom));
+            max-height: 92dvh;
+            overflow-y: auto;
+            animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .dialog-box {
+            background: #ffffff;
+            width: 100%;
+            max-width: 360px;
+            border-radius: 24px;
+            padding: 24px 20px;
+            text-align: center;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .modal-title {
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .close-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: #f1f5f9;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* ប៊ូតុងជ្រើសរើស ចំណាយ/ចំណូល ក្នុង Form */
+        .type-switch {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            background: #f1f5f9;
+            padding: 5px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+        }
+
+        .type-btn {
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .type-btn.active-exp { background: var(--expense); color: #fff; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3); }
+        .type-btn.active-inc { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3); }
+
+        /* Quick Amount Chips */
+        .quick-chips {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 8px 0 4px;
+            scrollbar-width: none;
+        }
+        .quick-chips::-webkit-scrollbar { display: none; }
+
+        .chip-btn {
+            background: #ecfdf5;
+            color: var(--primary-dark);
+            border: 1px solid #a7f3d0;
+            border-radius: 99px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.15s;
+        }
+
+        .chip-btn:active {
+            transform: scale(0.94);
+            background: #d1fae5;
+        }
+
+        /* Category Grid */
+        .cat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .cat-item {
+            border: 1.5px solid var(--border);
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 10px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+        }
+
+        .cat-item.selected-exp { border-color: var(--expense); background: var(--expense-bg); }
+        .cat-item.selected-inc { border-color: var(--primary); background: var(--income-bg); }
+
+        .cat-emoji {
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .cat-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .amount-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .amount-input {
+            font-size: 22px;
+            font-weight: 800;
+            padding: 12px 14px;
+            background: #f8fafc;
+        }
+
+        .currency-select {
+            width: 115px;
+            font-weight: 700;
+            background: #f1f5f9;
+            text-align: center;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            border-radius: 16px;
+            border: none;
+            background: var(--primary);
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+            transition: transform 0.15s;
+        }
+
+        .btn-primary:active { transform: scale(0.98); }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 13px;
+            border-radius: 14px;
+            border: 1.5px solid var(--border);
+            background: #ffffff;
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-danger {
+            width: 100%;
+            padding: 13px;
+            border-radius: 14px;
+            border: none;
+            background: var(--expense);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* ==========================================================================
+           4-DIGIT PIN LOCK OVERLAY SCREEN
+           ========================================================================== */
+        .pin-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(160deg, #064e3b 0%, #0f172a 100%);
+            color: #ffffff;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: calc(40px + env(safe-area-inset-top)) 24px calc(32px + env(safe-area-inset-bottom));
+        }
+
+        .pin-screen.active {
+            display: flex;
+        }
+
+        .pin-dots {
+            display: flex;
+            gap: 16px;
+            margin: 24px 0 12px;
+        }
+
+        .pin-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.15s;
+        }
+
+        .pin-dot.filled {
+            background: #10b981;
+            border-color: #10b981;
+            transform: scale(1.15);
+        }
+
+        .pin-dot.error {
+            background: #ef4444;
+            border-color: #ef4444;
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .key-btn {
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+        }
+
+        .key-btn:active {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(0.93);
+        }
+
+        .key-btn.empty {
+            background: transparent;
+            border: none;
+            cursor: default;
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: #cbd5e1;
+            transition: .3s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: calc(16px + env(safe-area-inset-top));
+            left: 50%;
+            transform: translate(-50%, -120%);
+            background: #1e293b;
+            color: #ffffff;
+            padding: 10px 18px;
+            border-radius: 99px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            z-index: 120;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 92vw;
+        }
+
+        .toast.show {
+            transform: translate(-50%, 0);
+        }
+
+        .undo-btn {
+            background: #10b981;
+            color: #fff;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* ==========================================================================
+           MULTIPLE WALLETS PILL BAR & WALLET MANAGEMENT STYLES
+           ========================================================================== */
+        .wallet-bar {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 2px 0 12px;
+            scrollbar-width: none;
+            position: relative;
+            z-index: 2;
+        }
+        .wallet-bar::-webkit-scrollbar { display: none; }
+
+        .wallet-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 13px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.14);
+            color: rgba(255, 255, 255, 0.92);
+            transition: all 0.15s;
+        }
+
+        .wallet-pill.active {
+            background: #ffffff;
+            color: var(--primary-dark);
+            border-color: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        }
+
+        .wallet-pill-light {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 13px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            cursor: pointer;
+            border: 1.5px solid var(--border);
+            background: #ffffff;
+            color: var(--text-muted);
+            transition: all 0.15s;
+        }
+
+        .wallet-pill-light.active {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            border-color: var(--primary);
+        }
+
+        .tx-wallet-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: #f1f5f9;
+            color: #475569;
+            padding: 1px 7px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+
+        .wallet-manage-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: #f8fafc;
+            margin-bottom: 8px;
+        }
+
+        .emoji-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .emoji-choice {
+            padding: 8px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border);
+            background: #ffffff;
+            font-size: 20px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .emoji-choice.selected {
+            border-color: var(--primary);
+            background: var(--income-bg);
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.97); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+        .shake { animation: shake 0.3s ease-in-out; }
+    </style>
+</head>
+<body>
+
+    <!-- ==========================================================================
+         ផ្ទាំងចាក់សោ PIN LOCK ៤ ខ្ទង់ (4-Digit PIN Lock Screen)
+         ========================================================================== -->
+    <div id="pinScreen" class="pin-screen">
+        <div style="text-align: center; margin-top: 20px;">
+            <div style="width: 64px; height: 64px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            </div>
+            <h2 id="pinScreenTitle" style="font-size: 20px; font-weight: 800;">បញ្ចូលលេខកូដសម្ងាត់</h2>
+            <p id="pinScreenSubtitle" style="font-size: 13px; color: #94a3b8; margin-top: 4px;">សូមបញ្ចូលលេខកូដ ៤ ខ្ទង់ដើម្បីបើកកម្មវិធី</p>
+
+            <div id="pinDotsContainer" class="pin-dots" style="justify-content: center;">
+                <div class="pin-dot" id="dot-0"></div>
+                <div class="pin-dot" id="dot-1"></div>
+                <div class="pin-dot" id="dot-2"></div>
+                <div class="pin-dot" id="dot-3"></div>
+            </div>
+            <p id="pinErrorMsg" style="font-size: 12px; color: #f87171; min-height: 18px; font-weight: 600;"></p>
+        </div>
+
+        <!-- ក្តារចុចលេខ 0-9 ធំៗងាយចុចលើទូរសព្ទ -->
+        <div class="keypad">
+            <button type="button" class="key-btn" onclick="pressPinKey('1')">1</button>
+            <button type="button" class="key-btn" onclick="pressPinKey('2')">2</button>
+            <button type="button" class="key-btn" onclick="pressPinKey('3')">3</button>
+            <button type="button" class="key-btn" onclick="pressPinKey('4')">4</button>
+            <button type="button" class="key-btn" onclick="pressPinKey('5')">5</button>
+            <button type="button" class="key-btn" onclick="pressPinKey('6')">6</button>
+            <button type="button" class="key-btn" onclick="pressPinKey('7')">7</button>
+            <button type="button" class="key-btn" onclick="pressPinKey('8')">8</button>
+            <button type="button" class="key-btn" onclick="pressPinKey('9')">9</button>
+            <button type="button" class="key-btn empty" id="pinCancelBtn" onclick="cancelPinSetup()" style="font-size: 14px; color: #94a3b8; display: none;">បោះបង់</button>
+            <div class="key-btn empty" id="pinEmptySpacer"></div>
+            <button type="button" class="key-btn" onclick="pressPinKey('0')">0</button>
+            <button type="button" class="key-btn" onclick="deletePinKey()" aria-label="លុបលេខ">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         ស៊ុមកម្មវិធីមេ (MAIN MOBILE APP SHELL)
+         ========================================================================== -->
+    <div class="app-shell">
+        <!-- ផ្នែកខាងលើ (Header & Balance Card) -->
+        <header class="app-header">
+            <div class="header-circle-1"></div>
+
+            <div class="header-top">
+                <div class="brand-box">
+                    <div class="brand-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
+                    </div>
+                    <div>
+                        <h1 class="brand-title">កត់ត្រាប្រាក់ប្រចាំថ្ងៃ</h1>
+                        <div class="offline-badge">
+                            <span class="offline-dot"></span>
+                            <span>ដំណើរការ Offline ១០០%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <!-- ប៊ូតុងប្តូររូបិយប័ណ្ណ -->
+                    <button type="button" class="pill-btn" onclick="toggleCurrency()" title="ប្តូររូបិយប័ណ្ណ">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m17 2 4 4-4 4"></path><path d="M3 11v-1a4 4 0 0 1 4-4h14"></path><path d="m7 22-4-4 4-4"></path><path d="M21 13v1a4 4 0 0 1-4 4H3"></path></svg>
+                        <span id="currencyBadgeText">រៀល (៛)</span>
+                    </button>
+
+                    <!-- ប៊ូតុងចាក់សោភ្លាមៗ (បង្ហាញពេលបើក PIN Lock) -->
+                    <button type="button" id="lockNowBtn" class="pill-btn icon-btn-header" onclick="lockAppNow()" style="display: none;" title="ចាក់សោកម្មវិធីភ្លាមៗ">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- របារជ្រើសរើសកាបូបលុយរហ័ស (Quick Wallet Switcher) -->
+            <div id="headerWalletBar" class="wallet-bar"></div>
+
+            <!-- កាតសមតុល្យសរុប -->
+            <div class="balance-card">
+                <div class="balance-header">
+                    <span id="balanceWalletTitle">សមតុល្យសរុប (ទាំងអស់)</span>
+                    <span id="periodBadge" class="period-tag">ខែនេះ</span>
+                </div>
+                <div id="totalBalance" class="balance-main">0 ៛</div>
+                <div id="secondaryBalance" class="balance-sub">≈ $0.00</div>
+            </div>
+
+            <!-- ចំណូលសរុប និង ចំណាយសរុប -->
+            <div class="summary-grid">
+                <div class="summary-box">
+                    <div class="summary-icon inc">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="17" y1="7" x2="7" y2="17"></line><polyline points="17 17 7 17 7 7"></polyline></svg>
+                    </div>
+                    <div style="min-width: 0;">
+                        <div class="summary-label">ចំណូលសរុប</div>
+                        <div id="totalIncome" class="summary-val inc">0 ៛</div>
+                    </div>
+                </div>
+                <div class="summary-box">
+                    <div class="summary-icon exp">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+                    </div>
+                    <div style="min-width: 0;">
+                        <div class="summary-label">ចំណាយសរុប</div>
+                        <div id="totalExpense" class="summary-val exp">0 ៛</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ======================================================================
+             TAB 1: ទំព័រដើម (សង្ខេប & ប្រតិបត្តិការថ្មីៗ)
+             ====================================================================== -->
+        <section id="tab-home" class="tab-view active">
+            <!-- កាតសមាមាត្រចំណូល និង ចំណាយ -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">📊 សមាមាត្រចំណូល ធៀបនឹង ចំណាយ</span>
+                    <span id="homeMonthLabel" style="font-size: 11px; color: var(--primary); font-weight: 700;"></span>
+                </div>
+                <div class="ratio-bar">
+                    <div id="ratioIncBar" class="ratio-inc" style="width: 50%;"></div>
+                    <div id="ratioExpBar" class="ratio-exp" style="width: 50%;"></div>
+                </div>
+                <div class="ratio-labels">
+                    <span id="ratioIncText" style="color: var(--primary);">ចំណូល 0%</span>
+                    <span id="ratioExpText" style="color: var(--expense);">ចំណាយ 0%</span>
+                </div>
+
+                <!-- វិភាគចំណាយតាមប្រភេទ -->
+                <div id="categorySummaryBox" style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px;">
+                </div>
+            </div>
+
+            <!-- ប្រតិបត្តិការថ្មីៗបំផុត -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h2 style="font-size: 15px; font-weight: 800;">ប្រតិបត្តិការថ្មីៗ</h2>
+                <button type="button" onclick="switchTab('transactions')" style="background: none; border: none; color: var(--primary); font-size: 12px; font-weight: 700; cursor: pointer;">
+                    មើលទាំងអស់ →
+                </button>
+            </div>
+            <div id="recentTxList" class="tx-list"></div>
+        </section>
+
+        <!-- ======================================================================
+             TAB 2: បញ្ជីប្រតិបត្តិការ (Read, Search, Filter, Update, Delete)
+             ====================================================================== -->
+        <section id="tab-transactions" class="tab-view">
+            <!-- ប្រអប់ស្វែងរក និង រើសខែ -->
+            <div class="filter-row">
+                <input type="text" id="searchInput" class="input-control" oninput="renderAll()" placeholder="🔍 ស្វែងរកកំណត់ចំណាំ ឬប្រភេទ..." style="flex: 1;">
+                <input type="month" id="monthFilter" class="input-control" onchange="renderAll()" style="width: 145px; font-size: 13px; font-weight: 600;">
+            </div>
+
+            <!-- តម្រងកាបូបលុយក្នុង Tab ប្រតិបត្តិការ -->
+            <div id="txWalletFilterBar" class="wallet-bar" style="padding-bottom: 8px;"></div>
+
+            <!-- ប៊ូតុងច្រោះប្រភេទ -->
+            <div class="filter-row" style="margin-bottom: 14px;">
+                <div class="segmented-control">
+                    <button type="button" id="seg-all" class="seg-btn active" onclick="setTypeFilter('all')">ទាំងអស់</button>
+                    <button type="button" id="seg-income" class="seg-btn" onclick="setTypeFilter('income')">ចំណូល</button>
+                    <button type="button" id="seg-expense" class="seg-btn" onclick="setTypeFilter('expense')">ចំណាយ</button>
+                </div>
+                <button type="button" class="btn-outline-sm" onclick="resetFilters()">គ្រប់ពេល</button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-size: 14px; font-weight: 800;">បញ្ជីប្រតិបត្តិការ</span>
+                <span id="txCountBadge" style="font-size: 12px; color: var(--text-muted); font-weight: 600;">0 ប្រតិបត្តិការ</span>
+            </div>
+
+            <div id="fullTxList" class="tx-list"></div>
+        </section>
+
+        <!-- ======================================================================
+             TAB 3: របាយការណ៍ប្រចាំខែ (MONTHLY SUMMARY & 12-MONTH CHART)
+             ====================================================================== -->
+        <section id="tab-reports" class="tab-view">
+            <!-- ជ្រើសរើសឆ្នាំ និង ទាញយក Excel ប្រចាំខែ -->
+            <div class="card">
+                <div class="card-header" style="margin-bottom: 10px;">
+                    <span class="card-title">📅 របាយការណ៍សរុបប្រចាំឆ្នាំ</span>
+                    <select id="reportYearSelect" class="input-control" onchange="renderMonthlyReport()" style="width: 110px; min-height: 38px; padding: 6px 10px; font-weight: 700; font-size: 13px;"></select>
+                </div>
+
+                <!-- តួលេខសរុបប្រចាំឆ្នាំ -->
+                <div class="monthly-row-stats" style="margin-bottom: 14px; background: #ecfdf5; border: 1px solid #a7f3d0;">
+                    <div>
+                        <div style="color: #065f46; font-weight: 600;">ចំណូលប្រចាំឆ្នាំ</div>
+                        <div id="yearTotalInc" style="color: var(--primary-dark); font-weight: 800; font-size: 12px;">0 ៛</div>
+                    </div>
+                    <div>
+                        <div style="color: #991b1b; font-weight: 600;">ចំណាយប្រចាំឆ្នាំ</div>
+                        <div id="yearTotalExp" style="color: var(--expense); font-weight: 800; font-size: 12px;">0 ៛</div>
+                    </div>
+                    <div>
+                        <div style="color: #1e293b; font-weight: 600;">សមតុល្យសល់</div>
+                        <div id="yearTotalBal" style="color: #0f172a; font-weight: 800; font-size: 12px;">0 ៛</div>
+                    </div>
+                </div>
+
+                <!-- ក្រាហ្វសរសរ ១២ ខែ -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">ក្រាហ្វប្រៀបធៀប ១២ ខែ</span>
+                    <div style="display: flex; gap: 10px; font-size: 11px; font-weight: 700;">
+                        <span style="color: var(--primary);">■ ចំណូល</span>
+                        <span style="color: var(--expense);">■ ចំណាយ</span>
+                    </div>
+                </div>
+                <div id="yearlyBarChart" class="year-chart-wrap"></div>
+                <p style="font-size: 11px; color: var(--text-muted); text-align: center;">ចុចលើខែណាមួយខាងក្រោមដើម្បីមើលប្រតិបត្តិការលម្អិត ឬទាញយក Excel ប្រចាំខែ</p>
+            </div>
+
+            <!-- បញ្ជីសរុបតាមខែនីមួយៗ -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h2 style="font-size: 15px; font-weight: 800;">តារាងសរុបតាមខែនីមួយៗ</h2>
+                <button type="button" class="btn-outline-sm" style="padding: 6px 10px; color: var(--primary-dark); border-color: #a7f3d0;" onclick="exportCSV(true)">
+                    📥 Excel ខែនេះ
+                </button>
+            </div>
+            <div id="monthlySummaryList"></div>
+        </section>
+
+        <!-- ======================================================================
+             TAB 4: ការកំណត់, PWA Install, Excel CSV, PIN Lock & Backup
+             ====================================================================== -->
+        <section id="tab-settings" class="tab-view">
+            <!-- ១. ដំឡើងជា App លើអេក្រង់ទូរសព្ទ (PWA Install) -->
+            <div class="card" style="background: linear-gradient(to right, #ecfdf5, #f0fdfa); border-color: #a7f3d0;">
+                <div class="card-title" style="color: #065f46; margin-bottom: 6px;">
+                    📱 ដំឡើងលើអេក្រង់ទូរសព្ទ (Install App)
+                </div>
+                <p style="font-size: 12px; color: #047857; margin-bottom: 12px;">
+                    ដំឡើងកម្មវិធីនេះលើអេក្រង់ដើម (Home Screen) ដើម្បីបើកប្រើប្រាស់បានលឿន និងគ្មានអ៊ីនធឺណិត 100%។
+                </p>
+                <button type="button" id="installPwaBtn" class="btn-primary" onclick="triggerPwaInstall()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>ដំឡើងកម្មវិធីលើទូរសព្ទ (Install)</span>
+                </button>
+            </div>
+
+            <!-- ២. គ្រប់គ្រងកាបូបលុយច្រើន (Multiple Wallets Management) -->
+            <div class="card">
+                <div class="card-header" style="margin-bottom: 10px;">
+                    <div>
+                        <div class="card-title">👛 គ្រប់គ្រងកាបូបលុយ (Multiple Wallets)</div>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">បែងចែកបញ្ជីលុយផ្ទាល់ខ្លួន គ្រួសារ ឬការងារ</p>
+                    </div>
+                    <button type="button" class="btn-primary" style="width: auto; padding: 8px 14px; font-size: 12px; border-radius: 12px;" onclick="openWalletFormModal()">
+                        + បង្កើតថ្មី
+                    </button>
+                </div>
+                <div id="walletManageList"></div>
+            </div>
+
+            <!-- ៣. ប្រព័ន្ធសុវត្ថិភាព PIN Lock ៤ ខ្ទង់ -->
+            <div class="card">
+                <div class="card-header" style="margin-bottom: 8px;">
+                    <div>
+                        <div class="card-title">🔐 ចាក់សោដោយលេខកូដ ៤ ខ្ទង់ (PIN Lock)</div>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">ការពារឯកជនភាពបញ្ជីចំណូល-ចំណាយរបស់អ្នក</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="pinToggleCheckbox" onchange="handlePinToggle(this)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div id="pinManageActions" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); gap: 8px;">
+                    <button type="button" class="btn-outline-sm" style="padding: 10px 14px; flex: 1;" onclick="startPinSetup('change')">ប្តូរលេខកូដ PIN ថ្មី</button>
+                    <button type="button" class="btn-outline-sm" style="padding: 10px 14px; color: var(--primary);" onclick="lockAppNow()">ចាក់សោឥឡូវនេះ</button>
+                </div>
+            </div>
+
+            <!-- ៤. អត្រាប្តូរប្រាក់ -->
+            <div class="card">
+                <div class="card-title" style="margin-bottom: 8px;">💱 អត្រាប្តូរប្រាក់ (១ ដុល្លារ = ? រៀល)</div>
+                <div style="display: flex; gap: 8px;">
+                    <input type="number" id="exchangeRateInput" class="input-control" value="4000" style="font-weight: 700;">
+                    <button type="button" class="btn-primary" style="width: auto; padding: 0 20px;" onclick="saveExchangeRate()">រក្សាទុក</button>
+                </div>
+            </div>
+
+            <!-- ៤. ទាញយករបាយការណ៍ Excel (CSV) និង Backup JSON -->
+            <div class="card">
+                <div class="card-title" style="margin-bottom: 6px;">📊 ទាញយករបាយការណ៍ & បម្រុងទុកទិន្នន័យ</div>
+                    <button type="button" class="btn-primary" style="background: #0d9488;" onclick="exportCSV(false)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                        <span>ទាញយក Excel ទាំងអស់ (Export All CSV)</span>
+                    </button>
+
+                    <button type="button" class="btn-secondary" style="border-color: #99f6e4; color: #0f766e;" onclick="exportCSV(true)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        <span>ទាញយក Excel តាមខែដែលកំពុងមើល (Monthly CSV)</span>
+                    </button>
+
+                    <button type="button" class="btn-secondary" onclick="exportJSON()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>រក្សាទុកទិន្នន័យបម្រុងទុក (Backup JSON)</span>
+                    </button>
+
+                    <label class="btn-secondary" style="cursor: pointer;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <span>បញ្ចូលទិន្នន័យពីឯកសារ (Import JSON)</span>
+                        <input type="file" id="importJsonInput" accept=".json" onchange="importJSON(event)" style="display: none;">
+                    </label>
+                </div>
+            </div>
+
+            <!-- ៥. លុបសម្អាតទិន្នន័យទាំងអស់ -->
+            <div class="card" style="border-color: #fecaca;">
+                <div class="card-title" style="color: var(--expense); margin-bottom: 6px;">⚠️ តំបន់គ្រោះថ្នាក់</div>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+                    លុបទិន្នន័យប្រតិបត្តិការទាំងអស់ចេញពីទូរសព្ទនេះ (សូម Backup ទុកជាមុន)។
+                </p>
+                <button type="button" class="btn-danger" onclick="openClearAllModal()">
+                    លុបសម្អាតទិន្នន័យទាំងអស់
+                </button>
+            </div>
+        </section>
+
+        <!-- ======================================================================
+             BOTTOM NAVIGATION BAR & FLOATING ACTION BUTTON (+)
+             ====================================================================== -->
+        <nav class="bottom-nav">
+            <button type="button" id="nav-home" class="nav-item active" onclick="switchTab('home')">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <span>ទំព័រដើម</span>
+            </button>
+
+            <button type="button" id="nav-transactions" class="nav-item" onclick="switchTab('transactions')">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                <span>ប្រតិបត្តិការ</span>
+            </button>
+
+            <div class="fab-wrapper">
+                <button type="button" class="fab-btn" onclick="openTxModal()" aria-label="កត់ត្រាថ្មី">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
+            </div>
+
+            <button type="button" id="nav-reports" class="nav-item" onclick="switchTab('reports')">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                <span>របាយការណ៍</span>
+            </button>
+
+            <button type="button" id="nav-settings" class="nav-item" onclick="switchTab('settings')">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <span>ការកំណត់</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- ==========================================================================
+         MODAL 1: បន្ថែម ឬ កែប្រែប្រតិបត្តិការ (CREATE / UPDATE BOTTOM SHEET)
+         ========================================================================== -->
+    <div id="txModal" class="modal-backdrop" onclick="if(event.target===this) closeTxModal()">
+        <div class="bottom-sheet">
+            <div class="modal-header">
+                <h3 id="txModalTitle" class="modal-title">កត់ត្រាចំណូល-ចំណាយថ្មី</h3>
+                <button type="button" class="close-btn" onclick="closeTxModal()">✕</button>
+            </div>
+
+            <form id="txForm" onsubmit="saveTransaction(event)">
+                <input type="hidden" id="editTxId" value="">
+                <input type="hidden" id="txType" value="expense">
+                <input type="hidden" id="txCategory" value="">
+
+                <!-- ជ្រើសរើស ចំណាយ ឬ ចំណូល -->
+                <div class="type-switch">
+                    <button type="button" id="btnTypeExp" class="type-btn active-exp" onclick="setFormType('expense')">
+                        ↑ ចំណាយ (-)
+                    </button>
+                    <button type="button" id="btnTypeInc" class="type-btn" onclick="setFormType('income')">
+                        ↓ ចំណូល (+)
+                    </button>
+                </div>
+
+                <!-- ជ្រើសរើសកាបូបលុយសម្រាប់ប្រតិបត្តិការនេះ -->
+                <div class="form-group">
+                    <label class="form-label">កាបូបលុយ *</label>
+                    <select id="txWalletId" class="input-control" style="font-weight: 700; background: #f8fafc;"></select>
+                </div>
+
+                <!-- ចំនួនទឹកប្រាក់ និង Quick Amount Chips -->
+                <div class="form-group">
+                    <label class="form-label">ចំនួនទឹកប្រាក់ *</label>
+                    <div class="amount-row">
+                        <input type="number" id="txAmount" class="input-control amount-input" step="any" min="0.01" required placeholder="0">
+                        <select id="txCurrency" class="input-control currency-select" onchange="renderQuickChips()">
+                            <option value="KHR">រៀល (៛)</option>
+                            <option value="USD">ដុល្លារ ($)</option>
+                        </select>
+                    </div>
+                    <!-- បន្ទះក្តារចុចលេខរហ័ស (Quick Amount Chips) -->
+                    <div id="quickChipsContainer" class="quick-chips"></div>
+                </div>
+
+                <!-- ជ្រើសរើសប្រភេទ -->
+                <div class="form-group">
+                    <label class="form-label">ជ្រើសរើសប្រភេទ *</label>
+                    <div id="categoryGrid" class="cat-grid"></div>
+                </div>
+
+                <!-- កាលបរិច្ឆេទ និង កំណត់ចំណាំ -->
+                <div style="display: grid; grid-template-columns: 1fr 1.3fr; gap: 10px; margin-bottom: 18px;">
+                    <div>
+                        <label class="form-label">កាលបរិច្ឆេទ *</label>
+                        <input type="date" id="txDate" class="input-control" required style="font-size: 13px;">
+                    </div>
+                    <div>
+                        <label class="form-label">កំណត់ចំណាំ</label>
+                        <input type="text" id="txNote" class="input-control" placeholder="ឧ. បាយថ្ងៃត្រង់...">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    ✓ រក្សាទុកទិន្នន័យ
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         MODAL 2: បញ្ជាក់ការលុបប្រតិបត្តិការ (CUSTOM CONFIRM DIALOG)
+         ========================================================================== -->
+    <div id="deleteModal" class="modal-backdrop center" onclick="if(event.target===this) closeDeleteModal()">
+        <div class="dialog-box">
+            <div style="width: 56px; height: 56px; background: var(--expense-bg); color: var(--expense); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 24px;">
+                🗑️
+            </div>
+            <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 6px;">លុបប្រតិបត្តិការនេះ?</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+                តើអ្នកពិតជាចង់លុបទិន្នន័យនេះមែនទេ? អ្នកអាចចុច Undo ភ្លាមៗប្រសិនបើច្រឡំដៃ។
+            </p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button type="button" class="btn-secondary" onclick="closeDeleteModal()">បោះបង់</button>
+                <button type="button" class="btn-danger" onclick="confirmDelete()">លុបចោល</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         MODAL 3: បញ្ជាក់ការលុបទិន្នន័យទាំងអស់ (CLEAR ALL DATA)
+         ========================================================================== -->
+    <div id="clearAllModal" class="modal-backdrop center" onclick="if(event.target===this) closeClearAllModal()">
+        <div class="dialog-box">
+            <div style="width: 56px; height: 56px; background: var(--expense-bg); color: var(--expense); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 24px;">
+                ⚠️
+            </div>
+            <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 6px;">លុបទិន្នន័យទាំងអស់?</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">
+                ទិន្នន័យចំណូល-ចំណាយទាំងអស់នឹងត្រូវលុបចេញពីទូរសព្ទជាអចិន្ត្រៃយ៍!
+            </p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button type="button" class="btn-secondary" onclick="closeClearAllModal()">បោះបង់</button>
+                <button type="button" class="btn-danger" onclick="confirmClearAll()">លុបទាំងអស់</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         MODAL 4: ណែនាំរបៀបដំឡើង PWA លើ iPhone / Android
+         ========================================================================== -->
+    <div id="pwaGuideModal" class="modal-backdrop center" onclick="if(event.target===this) closePwaGuideModal()">
+        <div class="dialog-box" style="text-align: left;">
+            <h3 style="font-size: 17px; font-weight: 800; margin-bottom: 10px; text-align: center;">📲 របៀបដំឡើងលើអេក្រង់ទូរសព្ទ</h3>
+            <div style="font-size: 13px; color: var(--text-main); display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px;">
+                <div style="background: #f8fafc; padding: 10px; border-radius: 12px; border: 1px solid var(--border);">
+                    <strong>សម្រាប់ Android (Chrome):</strong><br>
+                    ចុចលើសញ្ញា <strong>ចំណុច ៣ (⋮)</strong> នៅខាងលើខាងស្តាំ រួចជ្រើសរើស <strong>"Add to Home screen"</strong> ឬ <strong>"Install app"</strong>។
+                </div>
+                <div style="background: #f8fafc; padding: 10px; border-radius: 12px; border: 1px solid var(--border);">
+                    <strong>សម្រាប់ iPhone / iPad (Safari):</strong><br>
+                    ចុចលើប៊ូតុង <strong>Share (រូបប្រអប់មានព្រួញឡើងលើ)</strong> នៅខាងក្រោម រួចអូសចុះក្រោមជ្រើសរើស <strong>"Add to Home Screen"</strong>។
+                </div>
+            </div>
+            <button type="button" class="btn-primary" onclick="closePwaGuideModal()">យល់ព្រម</button>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         MODAL 5: បង្កើត ឬ កែប្រែកាបូបលុយ (WALLET CREATE / EDIT MODAL)
+         ========================================================================== -->
+    <div id="walletFormModal" class="modal-backdrop center" onclick="if(event.target===this) closeWalletFormModal()">
+        <div class="dialog-box" style="text-align: left;">
+            <div class="modal-header">
+                <h3 id="walletFormTitle" class="modal-title">បង្កើតកាបូបលុយថ្មី</h3>
+                <button type="button" class="close-btn" onclick="closeWalletFormModal()">✕</button>
+            </div>
+            <form onsubmit="saveWalletForm(event)">
+                <input type="hidden" id="editWalletId" value="">
+                <input type="hidden" id="selectedWalletEmoji" value="👛">
+
+                <div class="form-group">
+                    <label class="form-label">ឈ្មោះកាបូបលុយ *</label>
+                    <input type="text" id="walletNameInput" class="input-control" required placeholder="ឧ. លុយសន្សំ, ហាងកាហ្វេ...">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">រូបតំណាង (Icon)</label>
+                    <div id="walletEmojiGrid" class="emoji-picker-grid"></div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px;">
+                    <button type="button" class="btn-secondary" onclick="closeWalletFormModal()">បោះបង់</button>
+                    <button type="submit" class="btn-primary">រក្សាទុក</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         MODAL 6: ជម្រើសពេល IMPORT JSON (MERGE VS. OVERWRITE)
+         ========================================================================== -->
+    <div id="importChoiceModal" class="modal-backdrop center" onclick="if(event.target===this) closeImportChoiceModal()">
+        <div class="dialog-box" style="text-align: left;">
+            <div style="text-align: center; margin-bottom: 14px;">
+                <div style="width: 52px; height: 52px; background: #ecfdf5; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 24px;">
+                    📥
+                </div>
+                <h3 style="font-size: 17px; font-weight: 800;">ជ្រើសរើសវិធីបញ្ចូលទិន្នន័យ</h3>
+                <p id="importSummaryText" style="font-size: 12px; color: var(--text-muted); margin-top: 4px;"></p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
+                <button type="button" class="btn-primary" style="flex-direction: column; align-items: flex-start; padding: 12px 14px; gap: 2px;" onclick="executeJsonImport('merge')">
+                    <span style="font-size: 14px; font-weight: 800;">➕ បូកបញ្ចូលគ្នា (Merge) — ណែនាំ</span>
+                    <span style="font-size: 11px; font-weight: 500; opacity: 0.9;">រក្សាទុកទិន្នន័យចាស់ក្នុងទូរសព្ទ ហើយបូកបន្ថែមទិន្នន័យថ្មីពីឯកសារ (មិនឱ្យស្ទួនទិន្នន័យដដែល)</span>
+                </button>
+
+                <button type="button" class="btn-secondary" style="flex-direction: column; align-items: flex-start; padding: 12px 14px; gap: 2px; border-color: #fecaca; color: var(--expense);" onclick="executeJsonImport('overwrite')">
+                    <span style="font-size: 14px; font-weight: 800;">🔄 ជំនួសទាំងស្រុង (Overwrite)</span>
+                    <span style="font-size: 11px; font-weight: 500; color: var(--text-muted);">លុបទិន្នន័យចាស់ទាំងអស់ ហើយជំនួសដោយទិន្នន័យពីឯកសារថ្មី</span>
+                </button>
+            </div>
+
+            <button type="button" class="btn-outline-sm" style="width: 100%; padding: 10px;" onclick="closeImportChoiceModal()">បោះបង់</button>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION ជាមួយប៊ូតុង UNDO -->
+    <div id="toast" class="toast">
+        <span id="toastText">ជោគជ័យ!</span>
+        <button type="button" id="toastUndoBtn" class="undo-btn" style="display: none;" onclick="undoDelete()">ទាញយកវិញ (Undo)</button>
+    </div>
+
+    <script>
+        /* ==========================================================================
+           1. កំណត់ប្រភេទទិន្នន័យ និង រូបតំណាង (CATEGORIES & CONSTANTS)
+           ========================================================================== */
+        const CATEGORIES = {
+            expense: [
+                { id: 'food', name: 'អាហារ', emoji: '🍜', bg: '#ffedd5' },
+                { id: 'drink', name: 'ភេសជ្ជៈ/កាហ្វេ', emoji: '🧋', bg: '#fef3c7' },
+                { id: 'transport', name: 'ធ្វើដំណើរ', emoji: '⛽', bg: '#dbeafe' },
+                { id: 'shopping', name: 'ទិញទំនិញ', emoji: '🛍️', bg: '#fce7f3' },
+                { id: 'bills', name: 'វិក្កយបត្រ', emoji: '🧾', bg: '#f3e8ff' },
+                { id: 'health', name: 'សុខភាព', emoji: '💊', bg: '#ffe4e6' },
+                { id: 'social', name: 'កម្មវិធី/បុណ្យ', emoji: '🎁', bg: '#fef9c3' },
+                { id: 'other_exp', name: 'ផ្សេងៗ', emoji: '📦', bg: '#f1f5f9' }
+            ],
+            income: [
+                { id: 'salary', name: 'ប្រាក់ខែ', emoji: '💵', bg: '#d1fae5' },
+                { id: 'business', name: 'អាជីវកម្ម', emoji: '🏪', bg: '#ccfbf1' },
+                { id: 'bonus', name: 'ប្រាក់រង្វាន់', emoji: '🏆', bg: '#fef3c7' },
+                { id: 'other_inc', name: 'ផ្សេងៗ', emoji: '💰', bg: '#e0f2fe' }
+            ]
+        };
+
+        const KHMER_MONTHS = [
+            'មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា',
+            'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'
+        ];
+
+        const STORAGE_TX = 'kh_offline_tracker_tx_v2';
+        const STORAGE_CFG = 'kh_offline_tracker_cfg_v2';
+        const STORAGE_WALLETS = 'kh_offline_tracker_wallets_v2';
+
+        const DEFAULT_WALLETS = [
+            { id: 'w_personal', name: 'ផ្ទាល់ខ្លួន', emoji: '👤' },
+            { id: 'w_family', name: 'គ្រួសារ', emoji: '🏠' },
+            { id: 'w_work', name: 'ការងារ', emoji: '💼' }
+        ];
+
+        const WALLET_EMOJIS = ['👤', '🏠', '💼', '👛', '🏦', '💳', '🏪', '🎓', '✈️', '🚗', '💰', '🎯'];
+
+        let transactions = [];
+        let wallets = [];
+        let activeWalletId = 'all'; // 'all' ឬ id របស់កាបូបលុយ
+        let pendingImportData = null;
+
+        let config = {
+            currency: 'KHR',
+            rate: 4000,
+            pinEnabled: false,
+            pinCode: ''
+        };
+
+        let typeFilter = 'all';
+        let deleteTargetId = null;
+        let lastDeletedTx = null;
+        let deferredInstallPrompt = null;
+
+        /* ==========================================================================
+           2. ដំណើរការ PWA (DYNAMIC MANIFEST & SERVICE WORKER BLOB)
+           ========================================================================== */
+        function initPWA() {
+            // បង្កើត SVG App Icon ស្អាត
+            const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="115" fill="#059669"/><circle cx="256" cy="256" r="170" fill="rgba(255,255,255,0.15)"/><text x="50%" y="56%" dominant-baseline="middle" text-anchor="middle" font-size="220" font-family="sans-serif" fill="#ffffff" font-weight="bold">៛</text></svg>`;
+            const iconDataUri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgIcon);
+            document.getElementById('pwa-apple-icon').href = iconDataUri;
+
+            // បង្កើត Web App Manifest តាមរយៈ Blob URL
+            const manifestObj = {
+                name: 'កត់ត្រាចំណូល-ចំណាយប្រចាំថ្ងៃ',
+                short_name: 'កត់ត្រាប្រាក់',
+                description: 'កម្មវិធីកត់ត្រាចំណូលចំណាយប្រចាំថ្ងៃ Offline 100%',
+                start_url: location.href,
+                display: 'standalone',
+                background_color: '#f8fafc',
+                theme_color: '#059669',
+                icons: [
+                    { src: iconDataUri, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
+                    { src: iconDataUri, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
+                ]
+            };
+            const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
+            document.getElementById('pwa-manifest').href = URL.createObjectURL(manifestBlob);
+
+            // ចុះឈ្មោះ Offline Service Worker តាមរយៈ Blob URL (ប្រសិនបើ protocol អនុញ្ញាត)
+            if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.protocol === 'http:')) {
+                const swCode = `
+                    const CACHE_NAME = 'kh-expense-offline-v1';
+                    self.addEventListener('install', e => {
+                        self.skipWaiting();
+                        e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll([self.location.href]).catch(() => {})));
+                    });
+                    self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+                    self.addEventListener('fetch', e => {
+                        e.respondWith(
+                            caches.match(e.request).then(res => res || fetch(e.request).then(netRes => {
+                                const copy = netRes.clone();
+                                caches.open(CACHE_NAME).then(c => c.put(e.request, copy)).catch(() => {});
+                                return netRes;
+                            }).catch(() => caches.match(self.location.href)))
+                        );
+                    });
+                `;
+                try {
+                    const swBlob = new Blob([swCode], { type: 'application/javascript' });
+                    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(() => {});
+                } catch (e) {}
+            }
+
+            // ចាប់យកព្រឹត្តិការណ៍ beforeinstallprompt លើ Android Chrome
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredInstallPrompt = e;
+            });
+        }
+
+        async function triggerPwaInstall() {
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                const { outcome } = await deferredInstallPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    showToast('កំពុងដំឡើងកម្មវិធីលើអេក្រង់ទូរសព្ទ!');
+                }
+                deferredInstallPrompt = null;
+            } else {
+                document.getElementById('pwaGuideModal').classList.add('open');
+            }
+        }
+
+        function closePwaGuideModal() {
+            document.getElementById('pwaGuideModal').classList.remove('open');
+        }
+
+        /* ==========================================================================
+           3. ការគ្រប់គ្រងទិន្នន័យ (LOCALSTORAGE LOAD & SAVE)
+           ========================================================================== */
+        function loadStorage() {
+            try {
+                const rawCfg = localStorage.getItem(STORAGE_CFG);
+                if (rawCfg) config = { ...config, ...JSON.parse(rawCfg) };
+
+                const rawWallets = localStorage.getItem(STORAGE_WALLETS);
+                if (rawWallets) {
+                    wallets = JSON.parse(rawWallets);
+                }
+                if (!Array.isArray(wallets) || wallets.length === 0) {
+                    wallets = [...DEFAULT_WALLETS];
+                }
+
+                const rawTx = localStorage.getItem(STORAGE_TX);
+                if (rawTx) {
+                    transactions = JSON.parse(rawTx).map(tx => ({
+                        ...tx,
+                        walletId: tx.walletId || wallets[0].id
+                    }));
+                } else {
+                    const today = new Date().toISOString().split('T')[0];
+                    transactions = [
+                        { id: 'demo_1', walletId: 'w_personal', type: 'income', amount: 1500000, currency: 'KHR', category: 'salary', date: today, note: 'ប្រាក់ខែប្រចាំខែ (គំរូ)' },
+                        { id: 'demo_2', walletId: 'w_personal', type: 'expense', amount: 15000, currency: 'KHR', category: 'food', date: today, note: 'បាយថ្ងៃត្រង់' },
+                        { id: 'demo_3', walletId: 'w_work', type: 'expense', amount: 5, currency: 'USD', category: 'transport', date: today, note: 'ចាក់សាំងម៉ូតូទៅធ្វើការ' }
+                    ];
+                    saveStorage();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function saveStorage() {
+            try {
+                localStorage.setItem(STORAGE_TX, JSON.stringify(transactions));
+                localStorage.setItem(STORAGE_CFG, JSON.stringify(config));
+                localStorage.setItem(STORAGE_WALLETS, JSON.stringify(wallets));
+            } catch (e) {
+                showToast('មិនអាចរក្សាទុកទិន្នន័យបានទេ!');
+            }
+        }
+
+        /* ==========================================================================
+           3.5. ការគ្រប់គ្រងកាបូបលុយច្រើន (MULTIPLE WALLETS)
+           ========================================================================== */
+        function getWallet(walletId) {
+            return wallets.find(w => w.id === walletId) || wallets[0] || { id: 'w_personal', name: 'ផ្ទាល់ខ្លួន', emoji: '👛' };
+        }
+
+        function selectActiveWallet(walletId) {
+            activeWalletId = walletId;
+            renderWalletBars();
+            renderAll();
+        }
+
+        function renderWalletBars() {
+            const allList = [{ id: 'all', name: 'ទាំងអស់', emoji: '🌐' }, ...wallets];
+
+            // Header Wallet Bar (ផ្ទៃងងឹតបៃតង)
+            const headerBar = document.getElementById('headerWalletBar');
+            if (headerBar) {
+                headerBar.innerHTML = allList.map(w => `
+                    <button type="button" class="wallet-pill ${activeWalletId === w.id ? 'active' : ''}" onclick="selectActiveWallet('${w.id}')">
+                        <span>${w.emoji}</span>
+                        <span>${escapeHTML(w.name)}</span>
+                    </button>
+                `).join('');
+            }
+
+            // Transactions Tab Wallet Filter Bar (ផ្ទៃភ្លឺ)
+            const txBar = document.getElementById('txWalletFilterBar');
+            if (txBar) {
+                txBar.innerHTML = allList.map(w => `
+                    <button type="button" class="wallet-pill-light ${activeWalletId === w.id ? 'active' : ''}" onclick="selectActiveWallet('${w.id}')">
+                        <span>${w.emoji}</span>
+                        <span>${escapeHTML(w.name)}</span>
+                    </button>
+                `).join('');
+            }
+
+            // Settings Wallet Management List
+            const manageList = document.getElementById('walletManageList');
+            if (manageList) {
+                manageList.innerHTML = wallets.map(w => {
+                    const count = transactions.filter(t => t.walletId === w.id).length;
+                    return `
+                        <div class="wallet-manage-row">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 22px;">${w.emoji}</span>
+                                <div>
+                                    <div style="font-size: 14px; font-weight: 700;">${escapeHTML(w.name)}</div>
+                                    <div style="font-size: 11px; color: var(--text-muted);">${count} ប្រតិបត្តិការ</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button type="button" class="action-mini-btn edit" onclick="openWalletFormModal('${w.id}')" title="កែឈ្មោះ">✏️</button>
+                                ${wallets.length > 1 ? `<button type="button" class="action-mini-btn del" onclick="deleteWallet('${w.id}')" title="លុបកាបូប">🗑️</button>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function openWalletFormModal(editId = null) {
+            const title = document.getElementById('walletFormTitle');
+            const idInput = document.getElementById('editWalletId');
+            const nameInput = document.getElementById('walletNameInput');
+            const emojiInput = document.getElementById('selectedWalletEmoji');
+
+            if (editId) {
+                const w = wallets.find(item => item.id === editId);
+                if (!w) return;
+                title.textContent = 'កែប្រែកាបូបលុយ';
+                idInput.value = w.id;
+                nameInput.value = w.name;
+                emojiInput.value = w.emoji;
+            } else {
+                title.textContent = 'បង្កើតកាបូបលុយថ្មី';
+                idInput.value = '';
+                nameInput.value = '';
+                emojiInput.value = '👛';
+            }
+
+            renderWalletEmojiPicker();
+            document.getElementById('walletFormModal').classList.add('open');
+        }
+
+        function closeWalletFormModal() {
+            document.getElementById('walletFormModal').classList.remove('open');
+        }
+
+        function renderWalletEmojiPicker() {
+            const current = document.getElementById('selectedWalletEmoji').value;
+            const grid = document.getElementById('walletEmojiGrid');
+            grid.innerHTML = WALLET_EMOJIS.map(em => `
+                <div class="emoji-choice ${em === current ? 'selected' : ''}" onclick="selectWalletEmoji('${em}')">${em}</div>
+            `).join('');
+        }
+
+        function selectWalletEmoji(em) {
+            document.getElementById('selectedWalletEmoji').value = em;
+            renderWalletEmojiPicker();
+        }
+
+        function saveWalletForm(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editWalletId').value;
+            const name = document.getElementById('walletNameInput').value.trim();
+            const emoji = document.getElementById('selectedWalletEmoji').value || '👛';
+
+            if (!name) return;
+
+            if (editId) {
+                const idx = wallets.findIndex(w => w.id === editId);
+                if (idx !== -1) {
+                    wallets[idx] = { ...wallets[idx], name, emoji };
+                    showToast('បានកែប្រែឈ្មោះកាបូបលុយ!');
+                }
+            } else {
+                const newWallet = {
+                    id: 'w_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
+                    name,
+                    emoji
+                };
+                wallets.push(newWallet);
+                showToast(`បានបង្កើតកាបូប "${name}" ជោគជ័យ!`);
+            }
+
+            saveStorage();
+            closeWalletFormModal();
+            renderWalletBars();
+            renderAll();
+        }
+
+        function deleteWallet(walletId) {
+            if (wallets.length <= 1) {
+                showToast('ត្រូវមានកាបូបលុយយ៉ាងតិច ១!');
+                return;
+            }
+            const target = wallets.find(w => w.id === walletId);
+            if (!target) return;
+
+            const fallbackWallet = wallets.find(w => w.id !== walletId);
+            // ផ្ទេរប្រតិបត្តិការចាស់ៗទៅកាបូបផ្សេងដើម្បីកុំឱ្យបាត់ទិន្នន័យ
+            transactions = transactions.map(tx => tx.walletId === walletId ? { ...tx, walletId: fallbackWallet.id } : tx);
+            wallets = wallets.filter(w => w.id !== walletId);
+
+            if (activeWalletId === walletId) {
+                activeWalletId = 'all';
+            }
+
+            saveStorage();
+            renderWalletBars();
+            renderAll();
+            showToast(`បានលុបកាបូប "${target.name}" (ទិន្នន័យត្រូវបានផ្ទេរទៅ ${fallbackWallet.name})`);
+        }
+
+        /* ==========================================================================
+           4. ប្រព័ន្ធចាក់សោ ៤ ខ្ទង់ (4-DIGIT PIN LOCK SYSTEM)
+           ========================================================================== */
+        let pinMode = 'unlock'; // 'unlock', 'setup', 'confirm', 'disable'
+        let currentPinInput = '';
+        let tempNewPin = '';
+
+        function initPinState() {
+            const toggle = document.getElementById('pinToggleCheckbox');
+            const manageBox = document.getElementById('pinManageActions');
+            const lockBtn = document.getElementById('lockNowBtn');
+
+            toggle.checked = config.pinEnabled;
+            manageBox.style.display = config.pinEnabled ? 'flex' : 'none';
+            lockBtn.style.display = config.pinEnabled ? 'inline-flex' : 'none';
+
+            if (config.pinEnabled && config.pinCode) {
+                openPinScreen('unlock');
+            }
+        }
+
+        function openPinScreen(mode) {
+            pinMode = mode;
+            currentPinInput = '';
+            document.getElementById('pinErrorMsg').textContent = '';
+            updatePinDots();
+
+            const title = document.getElementById('pinScreenTitle');
+            const sub = document.getElementById('pinScreenSubtitle');
+            const cancelBtn = document.getElementById('pinCancelBtn');
+            const spacer = document.getElementById('pinEmptySpacer');
+
+            if (mode === 'unlock') {
+                title.textContent = 'បញ្ចូលលេខកូដសម្ងាត់';
+                sub.textContent = 'បញ្ចូលលេខកូដ ៤ ខ្ទង់ដើម្បីបើកកម្មវិធី';
+                cancelBtn.style.display = 'none';
+                spacer.style.display = 'block';
+            } else if (mode === 'setup') {
+                title.textContent = 'កំណត់លេខកូដ PIN ថ្មី';
+                sub.textContent = 'សូមបញ្ចូលលេខកូដ ៤ ខ្ទង់ដែលអ្នកចង់ប្រើ';
+                cancelBtn.style.display = 'flex';
+                spacer.style.display = 'none';
+            } else if (mode === 'confirm') {
+                title.textContent = 'បញ្ជាក់លេខកូដ PIN ម្តងទៀត';
+                sub.textContent = 'បញ្ចូលលេខកូដ ៤ ខ្ទង់ដដែលដើម្បីផ្ទៀងផ្ទាត់';
+                cancelBtn.style.display = 'flex';
+                spacer.style.display = 'none';
+            } else if (mode === 'disable') {
+                title.textContent = 'បញ្ចូលលេខកូដ PIN បច្ចុប្បន្ន';
+                sub.textContent = 'ផ្ទៀងផ្ទាត់លេខកូដដើម្បីបិទការចាក់សោ';
+                cancelBtn.style.display = 'flex';
+                spacer.style.display = 'none';
+            }
+
+            document.getElementById('pinScreen').classList.add('active');
+        }
+
+        function closePinScreen() {
+            document.getElementById('pinScreen').classList.remove('active');
+            currentPinInput = '';
+        }
+
+        function handlePinToggle(checkbox) {
+            if (checkbox.checked) {
+                checkbox.checked = false; // រង់ចាំបញ្ចូល PIN រួចសិន
+                startPinSetup('new');
+            } else {
+                checkbox.checked = true; // រង់ចាំផ្ទៀងផ្ទាត់ PIN ចាស់សិន
+                openPinScreen('disable');
+            }
+        }
+
+        function startPinSetup() {
+            tempNewPin = '';
+            openPinScreen('setup');
+        }
+
+        function cancelPinSetup() {
+            closePinScreen();
+            initPinState();
+        }
+
+        function lockAppNow() {
+            if (config.pinEnabled && config.pinCode) {
+                openPinScreen('unlock');
+            }
+        }
+
+        function pressPinKey(digit) {
+            if (currentPinInput.length >= 4) return;
+            currentPinInput += digit;
+            document.getElementById('pinErrorMsg').textContent = '';
+            updatePinDots();
+
+            if (currentPinInput.length === 4) {
+                setTimeout(processPinComplete, 120);
+            }
+        }
+
+        function deletePinKey() {
+            if (currentPinInput.length > 0) {
+                currentPinInput = currentPinInput.slice(0, -1);
+                updatePinDots();
+            }
+        }
+
+        function updatePinDots(isError = false) {
+            for (let i = 0; i < 4; i++) {
+                const dot = document.getElementById(`dot-${i}`);
+                dot.className = 'pin-dot';
+                if (isError) {
+                    dot.classList.add('error');
+                } else if (i < currentPinInput.length) {
+                    dot.classList.add('filled');
+                }
+            }
+        }
+
+        function triggerPinError(msg) {
+            document.getElementById('pinErrorMsg').textContent = msg;
+            updatePinDots(true);
+            const box = document.getElementById('pinDotsContainer');
+            box.classList.remove('shake');
+            void box.offsetWidth;
+            box.classList.add('shake');
+            setTimeout(() => {
+                currentPinInput = '';
+                updatePinDots(false);
+            }, 450);
+        }
+
+        function processPinComplete() {
+            if (pinMode === 'unlock') {
+                if (currentPinInput === config.pinCode) {
+                    closePinScreen();
+                } else {
+                    triggerPinError('លេខកូដសម្ងាត់មិនត្រឹមត្រូវ សូមព្យាយាមម្តងទៀត!');
+                }
+            } else if (pinMode === 'setup') {
+                tempNewPin = currentPinInput;
+                openPinScreen('confirm');
+            } else if (pinMode === 'confirm') {
+                if (currentPinInput === tempNewPin) {
+                    config.pinEnabled = true;
+                    config.pinCode = tempNewPin;
+                    saveStorage();
+                    closePinScreen();
+                    initPinState();
+                    showToast('បានបើកការចាក់សោ PIN ៤ ខ្ទង់ជោគជ័យ!');
+                } else {
+                    triggerPinError('លេខកូដមិនដូចគ្នាទេ សូមបញ្ចូលម្តងទៀត!');
+                }
+            } else if (pinMode === 'disable') {
+                if (currentPinInput === config.pinCode) {
+                    config.pinEnabled = false;
+                    config.pinCode = '';
+                    saveStorage();
+                    closePinScreen();
+                    initPinState();
+                    showToast('បានបិទមុខងារចាក់សោ PIN រួចរាល់!');
+                } else {
+                    triggerPinError('លេខកូដ PIN មិនត្រឹមត្រូវទេ!');
+                }
+            }
+        }
+
+        /* ==========================================================================
+           5. ការបម្លែងរូបិយប័ណ្ណ និង ទម្រង់បង្ហាញ (CURRENCY & FORMATTING)
+           ========================================================================== */
+        function convertMoney(amount, fromCurr, toCurr) {
+            const val = parseFloat(amount) || 0;
+            if (fromCurr === toCurr) return val;
+            if (fromCurr === 'USD' && toCurr === 'KHR') return val * config.rate;
+            if (fromCurr === 'KHR' && toCurr === 'USD') return val / config.rate;
+            return val;
+        }
+
+        function formatMoney(amount, curr) {
+            const val = parseFloat(amount) || 0;
+            if (curr === 'KHR') {
+                return Math.round(val).toLocaleString('en-US') + ' ៛';
+            }
+            return '$' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function formatKhmerDate(dateStr) {
+            if (!dateStr) return '';
+            const [y, m, d] = dateStr.split('-');
+            if (!y || !m || !d) return dateStr;
+            return `ទី ${parseInt(d, 10)} ${KHMER_MONTHS[parseInt(m, 10) - 1]} ${y}`;
+        }
+
+        function toggleCurrency() {
+            config.currency = config.currency === 'KHR' ? 'USD' : 'KHR';
+            saveStorage();
+            updateCurrencyBadge();
+            renderAll();
+            showToast(`បង្ហាញជា ${config.currency === 'KHR' ? 'ប្រាក់រៀល (៛)' : 'ប្រាក់ដុល្លារ ($)'}`);
+        }
+
+        function updateCurrencyBadge() {
+            document.getElementById('currencyBadgeText').textContent = config.currency === 'KHR' ? 'រៀល (៛)' : 'ដុល្លារ ($)';
+        }
+
+        function saveExchangeRate() {
+            const val = parseFloat(document.getElementById('exchangeRateInput').value);
+            if (val && val > 0) {
+                config.rate = val;
+                saveStorage();
+                renderAll();
+                showToast(`បានរក្សាទុកអត្រាប្តូរប្រាក់ 1$ = ${val.toLocaleString()} ៛`);
+            }
+        }
+
+        /* ==========================================================================
+           6. ការប្តូរ TAB & បង្ហាញទិន្នន័យលើអេក្រង់ (NAVIGATION & RENDERING)
+           ========================================================================== */
+        function switchTab(tabName) {
+            ['home', 'transactions', 'reports', 'settings'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.remove('active');
+                document.getElementById(`nav-${t}`).classList.remove('active');
+            });
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            document.getElementById(`nav-${tabName}`).classList.add('active');
+            if (tabName === 'reports') {
+                renderMonthlyReport();
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function setTypeFilter(type) {
+            typeFilter = type;
+            ['all', 'income', 'expense'].forEach(t => {
+                const btn = document.getElementById(`seg-${t}`);
+                btn.classList.toggle('active', t === type);
+            });
+            renderAll();
+        }
+
+        function resetFilters() {
+            document.getElementById('monthFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            setTypeFilter('all');
+            showToast('បង្ហាញទិន្នន័យគ្រប់ពេលទាំងអស់');
+        }
+
+        function getCategory(type, catId) {
+            return (CATEGORIES[type] || []).find(c => c.id === catId) || { id: catId, name: 'ផ្សេងៗ', emoji: '📌', bg: '#f1f5f9' };
+        }
+
+        function renderAll() {
+            const monthVal = document.getElementById('monthFilter').value;
+            const searchVal = document.getElementById('searchInput').value.trim().toLowerCase();
+
+            // ចំណងជើងកាបូបលុយលើកាតសមតុល្យ
+            const walletTitleEl = document.getElementById('balanceWalletTitle');
+            if (activeWalletId === 'all') {
+                walletTitleEl.textContent = 'សមតុល្យសរុប (គ្រប់កាបូបលុយ)';
+            } else {
+                const w = getWallet(activeWalletId);
+                walletTitleEl.textContent = `សមតុល្យ៖ ${w.emoji} ${w.name}`;
+            }
+
+            // ស្លាកខែ
+            const periodText = monthVal
+                ? `ខែ${KHMER_MONTHS[parseInt(monthVal.split('-')[1], 10) - 1]} ${monthVal.split('-')[0]}`
+                : 'គ្រប់ពេលទាំងអស់';
+            document.getElementById('periodBadge').textContent = periodText;
+            document.getElementById('homeMonthLabel').textContent = periodText;
+
+            // ច្រោះតាមកាបូបលុយ និង ខែ
+            const periodTx = transactions.filter(tx => {
+                const matchWallet = activeWalletId === 'all' || tx.walletId === activeWalletId;
+                const matchMonth = !monthVal || tx.date.startsWith(monthVal);
+                return matchWallet && matchMonth;
+            });
+
+            // គណនាសរុប
+            let sumInc = 0;
+            let sumExp = 0;
+            const catExpMap = {};
+
+            periodTx.forEach(tx => {
+                const amt = convertMoney(tx.amount, tx.currency, config.currency);
+                if (tx.type === 'income') {
+                    sumInc += amt;
+                } else {
+                    sumExp += amt;
+                    catExpMap[tx.category] = (catExpMap[tx.category] || 0) + amt;
+                }
+            });
+
+            const balance = sumInc - sumExp;
+            const otherCurr = config.currency === 'KHR' ? 'USD' : 'KHR';
+            const otherBal = convertMoney(balance, config.currency, otherCurr);
+
+            document.getElementById('totalBalance').textContent = formatMoney(balance, config.currency);
+            document.getElementById('secondaryBalance').textContent = `≈ ${formatMoney(otherBal, otherCurr)}`;
+            document.getElementById('totalIncome').textContent = formatMoney(sumInc, config.currency);
+            document.getElementById('totalExpense').textContent = formatMoney(sumExp, config.currency);
+
+            // របារភាគរយ
+            const totalVol = sumInc + sumExp;
+            const incPct = totalVol > 0 ? Math.round((sumInc / totalVol) * 100) : 0;
+            const expPct = totalVol > 0 ? 100 - incPct : 0;
+
+            document.getElementById('ratioIncBar').style.width = totalVol > 0 ? `${incPct}%` : '0%';
+            document.getElementById('ratioExpBar').style.width = totalVol > 0 ? `${expPct}%` : '0%';
+            document.getElementById('ratioIncText').textContent = `ចំណូល ${incPct}%`;
+            document.getElementById('ratioExpText').textContent = `ចំណាយ ${expPct}%`;
+
+            // វិភាគចំណាយតាមប្រភេទ
+            renderCategoryBreakdown(catExpMap, sumExp);
+
+            // តម្រៀបប្រតិបត្តិការពីថ្មីទៅចាស់
+            const sortedPeriodTx = [...periodTx].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            // បង្ហាញ ៥ ប្រតិបត្តិការថ្មីៗលើទំព័រដើម
+            renderTxList(sortedPeriodTx.slice(0, 5), 'recentTxList');
+
+            // ច្រោះបន្ថែមសម្រាប់ Tab ប្រតិបត្តិការ
+            const filteredTx = sortedPeriodTx.filter(tx => {
+                if (typeFilter !== 'all' && tx.type !== typeFilter) return false;
+                if (searchVal) {
+                    const cat = getCategory(tx.type, tx.category);
+                    const matchNote = (tx.note || '').toLowerCase().includes(searchVal);
+                    const matchCat = cat.name.toLowerCase().includes(searchVal);
+                    const matchAmt = String(tx.amount).includes(searchVal);
+                    return matchNote || matchCat || matchAmt;
+                }
+                return true;
+            });
+
+            document.getElementById('txCountBadge').textContent = `${filteredTx.length} ប្រតិបត្តិការ`;
+            renderTxList(filteredTx, 'fullTxList');
+
+            if (document.getElementById('tab-reports').classList.contains('active')) {
+                renderMonthlyReport();
+            }
+        }
+
+        function populateReportYears() {
+            const sel = document.getElementById('reportYearSelect');
+            if (!sel) return;
+            const currentYear = new Date().getFullYear();
+            const years = new Set([currentYear]);
+            transactions.forEach(tx => {
+                if (tx.date && tx.date.length >= 4) {
+                    years.add(parseInt(tx.date.slice(0, 4), 10));
+                }
+            });
+            const prevVal = sel.value || String(currentYear);
+            const sortedYears = Array.from(years).sort((a, b) => b - a);
+            sel.innerHTML = sortedYears.map(y => `<option value="${y}">ឆ្នាំ ${y}</option>`).join('');
+            sel.value = sortedYears.includes(parseInt(prevVal, 10)) ? prevVal : String(currentYear);
+        }
+
+        function renderMonthlyReport() {
+            populateReportYears();
+            const yearSel = document.getElementById('reportYearSelect');
+            const selectedYear = yearSel ? yearSel.value : String(new Date().getFullYear());
+            const currentMonthFilter = document.getElementById('monthFilter').value;
+
+            const monthlyData = Array.from({ length: 12 }, (_, idx) => {
+                const mNum = String(idx + 1).padStart(2, '0');
+                return {
+                    monthIndex: idx,
+                    ym: `${selectedYear}-${mNum}`,
+                    name: KHMER_MONTHS[idx],
+                    inc: 0,
+                    exp: 0,
+                    count: 0
+                };
+            });
+
+            let yearInc = 0;
+            let yearExp = 0;
+
+            transactions.forEach(tx => {
+                const matchWallet = activeWalletId === 'all' || tx.walletId === activeWalletId;
+                if (!matchWallet || !tx.date || !tx.date.startsWith(selectedYear)) return;
+                const mIdx = parseInt(tx.date.slice(5, 7), 10) - 1;
+                if (mIdx >= 0 && mIdx < 12) {
+                    const amt = convertMoney(tx.amount, tx.currency, config.currency);
+                    if (tx.type === 'income') {
+                        monthlyData[mIdx].inc += amt;
+                        yearInc += amt;
+                    } else {
+                        monthlyData[mIdx].exp += amt;
+                        yearExp += amt;
+                    }
+                    monthlyData[mIdx].count++;
+                }
+            });
+
+            document.getElementById('yearTotalInc').textContent = formatMoney(yearInc, config.currency);
+            document.getElementById('yearTotalExp').textContent = formatMoney(yearExp, config.currency);
+            document.getElementById('yearTotalBal').textContent = formatMoney(yearInc - yearExp, config.currency);
+
+            // គូរក្រាហ្វសរសរ ១២ ខែ
+            const maxVal = Math.max(...monthlyData.map(m => Math.max(m.inc, m.exp)), 1);
+            const chartEl = document.getElementById('yearlyBarChart');
+            chartEl.innerHTML = monthlyData.map(m => {
+                const incH = m.inc > 0 ? Math.max(Math.round((m.inc / maxVal) * 112), 4) : 2;
+                const expH = m.exp > 0 ? Math.max(Math.round((m.exp / maxVal) * 112), 4) : 2;
+                const isSel = currentMonthFilter === m.ym;
+                return `
+                    <div class="month-col ${isSel ? 'selected' : ''}" onclick="jumpToMonth('${m.ym}')" title="ខែ${m.name}">
+                        <div class="bars-pair">
+                            <div class="bar-inc" style="height: ${incH}px;"></div>
+                            <div class="bar-exp" style="height: ${expH}px;"></div>
+                        </div>
+                        <span class="month-col-label">ខែ${m.monthIndex + 1}</span>
+                    </div>
+                `;
+            }).join('');
+
+            // បង្ហាញតារាងសរុបតាមខែ (បង្ហាញខែដែលមានទិន្នន័យ ឬទាំង ១២ ខែ)
+            const listEl = document.getElementById('monthlySummaryList');
+            const activeMonths = [...monthlyData].reverse();
+            listEl.innerHTML = activeMonths.map(m => {
+                const bal = m.inc - m.exp;
+                const balColor = bal >= 0 ? 'var(--primary-dark)' : 'var(--expense)';
+                return `
+                    <div class="monthly-row-card" onclick="jumpToMonth('${m.ym}')">
+                        <div class="monthly-row-top">
+                            <div style="font-size: 14px; font-weight: 800; color: var(--text-main);">
+                                🗓️ ខែ${m.name} ${selectedYear}
+                                <span style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-left: 6px;">(${m.count} ប្រតិបត្តិការ)</span>
+                            </div>
+                            <span style="font-size: 11px; color: var(--primary); font-weight: 700;">មើលលម្អិត →</span>
+                        </div>
+                        <div class="monthly-row-stats">
+                            <div>
+                                <div style="color: var(--text-muted);">ចំណូល</div>
+                                <div style="color: var(--primary); font-weight: 700;">+${formatMoney(m.inc, config.currency)}</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--text-muted);">ចំណាយ</div>
+                                <div style="color: var(--expense); font-weight: 700;">-${formatMoney(m.exp, config.currency)}</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--text-muted);">សមតុល្យ</div>
+                                <div style="color: ${balColor}; font-weight: 800;">${formatMoney(bal, config.currency)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function jumpToMonth(ym) {
+            document.getElementById('monthFilter').value = ym;
+            renderAll();
+            switchTab('transactions');
+            const mIdx = parseInt(ym.split('-')[1], 10) - 1;
+            showToast(`បង្ហាញកំណត់ត្រា ខែ${KHMER_MONTHS[mIdx]} ${ym.split('-')[0]}`);
+        }
+
+        function renderCategoryBreakdown(catExpMap, totalExp) {
+            const box = document.getElementById('categorySummaryBox');
+            const items = Object.entries(catExpMap).sort((a, b) => b[1] - a[1]);
+
+            if (items.length === 0 || totalExp === 0) {
+                box.innerHTML = `<div style="text-align: center; font-size: 12px; color: var(--text-muted);">មិនទាន់មានទិន្នន័យចំណាយក្នុងអំឡុងពេលនេះទេ</div>`;
+                return;
+            }
+
+            box.innerHTML = items.map(([catId, val]) => {
+                const cat = getCategory('expense', catId);
+                const pct = Math.round((val / totalExp) * 100);
+                return `
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px;">
+                            <span style="font-weight: 600;">${cat.emoji} ${cat.name}</span>
+                            <span style="font-weight: 700;">${formatMoney(val, config.currency)} (${pct}%)</span>
+                        </div>
+                        <div style="width: 100%; height: 6px; background: #f1f5f9; border-radius: 99px; overflow: hidden;">
+                            <div style="width: ${pct}%; height: 100%; background: var(--expense); border-radius: 99px;"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderTxList(list, containerId) {
+            const container = document.getElementById(containerId);
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="card" style="text-align: center; padding: 32px 16px;">
+                        <div style="font-size: 36px; margin-bottom: 8px;">📭</div>
+                        <div style="font-size: 14px; font-weight: 700; margin-bottom: 4px;">មិនទាន់មានទិន្នន័យនៅឡើយទេ</div>
+                        <div style="font-size: 12px; color: var(--text-muted);">ចុចប៊ូតុង (+) ខាងក្រោមដើម្បីចាប់ផ្តើមកត់ត្រា</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = list.map(tx => {
+                const cat = getCategory(tx.type, tx.category);
+                const w = getWallet(tx.walletId);
+                const isInc = tx.type === 'income';
+                const sign = isInc ? '+' : '-';
+                const cls = isInc ? 'inc' : 'exp';
+                const converted = convertMoney(tx.amount, tx.currency, config.currency);
+                const showSub = tx.currency !== config.currency;
+
+                return `
+                    <div class="tx-item">
+                        <div class="tx-left" onclick="openTxModal('${tx.id}')">
+                            <div class="tx-icon" style="background: ${cat.bg};">${cat.emoji}</div>
+                            <div class="tx-info">
+                                <div class="tx-cat">
+                                    ${cat.name}
+                                    ${activeWalletId === 'all' ? `<span class="tx-wallet-tag">${w.emoji} ${escapeHTML(w.name)}</span>` : ''}
+                                </div>
+                                ${tx.note ? `<div class="tx-note">${escapeHTML(tx.note)}</div>` : ''}
+                                <div class="tx-date">${formatKhmerDate(tx.date)}</div>
+                            </div>
+                        </div>
+                        <div class="tx-right">
+                            <div class="tx-amount ${cls}">${sign}${formatMoney(tx.amount, tx.currency)}</div>
+                            ${showSub ? `<div class="tx-sub-amount">≈ ${formatMoney(converted, config.currency)}</div>` : ''}
+                            <div class="tx-actions">
+                                <button type="button" class="action-mini-btn edit" onclick="openTxModal('${tx.id}')" title="កែប្រែ">✏️</button>
+                                <button type="button" class="action-mini-btn del" onclick="openDeleteModal('${tx.id}')" title="លុប">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /* ==========================================================================
+           7. មុខងារ CREATE & UPDATE (MODAL FORM & QUICK AMOUNT CHIPS)
+           ========================================================================== */
+        function populateTxWalletSelect(selectedId = null) {
+            const sel = document.getElementById('txWalletId');
+            sel.innerHTML = wallets.map(w => `<option value="${w.id}">${w.emoji} ${escapeHTML(w.name)}</option>`).join('');
+            if (selectedId && wallets.some(w => w.id === selectedId)) {
+                sel.value = selectedId;
+            } else if (activeWalletId !== 'all' && wallets.some(w => w.id === activeWalletId)) {
+                sel.value = activeWalletId;
+            } else {
+                sel.value = wallets[0].id;
+            }
+        }
+
+        function openTxModal(editId = null) {
+            const form = document.getElementById('txForm');
+            form.reset();
+
+            if (editId) {
+                const tx = transactions.find(t => t.id === editId);
+                if (!tx) return;
+                document.getElementById('txModalTitle').textContent = 'កែប្រែប្រតិបត្តិការ';
+                document.getElementById('editTxId').value = tx.id;
+                populateTxWalletSelect(tx.walletId);
+                document.getElementById('txAmount').value = tx.amount;
+                document.getElementById('txCurrency').value = tx.currency;
+                document.getElementById('txDate').value = tx.date;
+                document.getElementById('txNote').value = tx.note || '';
+                setFormType(tx.type, tx.category);
+            } else {
+                document.getElementById('txModalTitle').textContent = 'កត់ត្រាចំណូល-ចំណាយថ្មី';
+                document.getElementById('editTxId').value = '';
+                populateTxWalletSelect();
+                document.getElementById('txCurrency').value = config.currency;
+                document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
+                setFormType('expense');
+            }
+
+            renderQuickChips();
+            document.getElementById('txModal').classList.add('open');
+        }
+
+        function closeTxModal() {
+            document.getElementById('txModal').classList.remove('open');
+        }
+
+        function setFormType(type, selectedCatId = null) {
+            document.getElementById('txType').value = type;
+            const btnExp = document.getElementById('btnTypeExp');
+            const btnInc = document.getElementById('btnTypeInc');
+
+            btnExp.className = type === 'expense' ? 'type-btn active-exp' : 'type-btn';
+            btnInc.className = type === 'income' ? 'type-btn active-inc' : 'type-btn';
+
+            const cats = CATEGORIES[type];
+            const activeId = selectedCatId || cats[0].id;
+            document.getElementById('txCategory').value = activeId;
+
+            const grid = document.getElementById('categoryGrid');
+            grid.innerHTML = cats.map(c => {
+                const isSel = c.id === activeId;
+                const selClass = isSel ? (type === 'expense' ? 'selected-exp' : 'selected-inc') : '';
+                return `
+                    <div class="cat-item ${selClass}" onclick="selectFormCategory('${c.id}')">
+                        <span class="cat-emoji">${c.emoji}</span>
+                        <span class="cat-name">${c.name}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function selectFormCategory(catId) {
+            const type = document.getElementById('txType').value;
+            setFormType(type, catId);
+        }
+
+        function renderQuickChips() {
+            const curr = document.getElementById('txCurrency').value;
+            const container = document.getElementById('quickChipsContainer');
+            const presets = curr === 'KHR'
+                ? [5000, 10000, 20000, 50000]
+                : [1, 5, 10, 20];
+
+            container.innerHTML = presets.map(val => {
+                const label = curr === 'KHR' ? `+${val.toLocaleString()}៛` : `+$${val}`;
+                return `<button type="button" class="chip-btn" onclick="addQuickAmount(${val})">${label}</button>`;
+            }).join('');
+        }
+
+        function addQuickAmount(val) {
+            const input = document.getElementById('txAmount');
+            const current = parseFloat(input.value) || 0;
+            input.value = current + val;
+        }
+
+        function saveTransaction(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editTxId').value;
+            const walletId = document.getElementById('txWalletId').value || wallets[0].id;
+            const type = document.getElementById('txType').value;
+            const amount = parseFloat(document.getElementById('txAmount').value);
+            const currency = document.getElementById('txCurrency').value;
+            const category = document.getElementById('txCategory').value;
+            const date = document.getElementById('txDate').value;
+            const note = document.getElementById('txNote').value.trim();
+
+            if (!amount || amount <= 0 || !category || !date) {
+                showToast('សូមបញ្ចូលទិន្នន័យឱ្យបានត្រឹមត្រូវ!');
+                return;
+            }
+
+            if (editId) {
+                const idx = transactions.findIndex(t => t.id === editId);
+                if (idx !== -1) {
+                    transactions[idx] = { ...transactions[idx], walletId, type, amount, currency, category, date, note };
+                    showToast('បានកែប្រែប្រតិបត្តិការជោគជ័យ!');
+                }
+            } else {
+                transactions.unshift({
+                    id: 'tx_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                    walletId, type, amount, currency, category, date, note
+                });
+                showToast('បានកត់ត្រាទិន្នន័យថ្មីជោគជ័យ!');
+            }
+
+            saveStorage();
+            closeTxModal();
+            renderWalletBars();
+            renderAll();
+        }
+
+        /* ==========================================================================
+           8. មុខងារ DELETE & UNDO (CUSTOM CONFIRM MODAL)
+           ========================================================================== */
+        function openDeleteModal(id) {
+            deleteTargetId = id;
+            document.getElementById('deleteModal').classList.add('open');
+        }
+
+        function closeDeleteModal() {
+            deleteTargetId = null;
+            document.getElementById('deleteModal').classList.remove('open');
+        }
+
+        function confirmDelete() {
+            if (!deleteTargetId) return;
+            const target = transactions.find(t => t.id === deleteTargetId);
+            if (target) {
+                lastDeletedTx = target;
+                transactions = transactions.filter(t => t.id !== deleteTargetId);
+                saveStorage();
+                renderWalletBars();
+                renderAll();
+                showToast('បានលុបប្រតិបត្តិការ!', true);
+            }
+            closeDeleteModal();
+        }
+
+        function undoDelete() {
+            if (!lastDeletedTx) return;
+            transactions.unshift(lastDeletedTx);
+            lastDeletedTx = null;
+            saveStorage();
+            renderWalletBars();
+            renderAll();
+            showToast('បានទាញយកទិន្នន័យមកវិញ!');
+        }
+
+        function openClearAllModal() {
+            document.getElementById('clearAllModal').classList.add('open');
+        }
+
+        function closeClearAllModal() {
+            document.getElementById('clearAllModal').classList.remove('open');
+        }
+
+        function confirmClearAll() {
+            transactions = [];
+            saveStorage();
+            closeClearAllModal();
+            renderWalletBars();
+            renderAll();
+            showToast('បានលុបសម្អាតទិន្នន័យទាំងអស់រួចរាល់!');
+        }
+
+        /* ==========================================================================
+           9. ទាញយករបាយការណ៍ EXCEL (EXPORT CSV UTF-8 BOM) & SMART BACKUP JSON
+           ========================================================================== */
+        function exportCSV(onlyCurrentMonth = false) {
+            const monthVal = document.getElementById('monthFilter').value;
+            let targetList = transactions.filter(tx => activeWalletId === 'all' || tx.walletId === activeWalletId);
+
+            if (onlyCurrentMonth && monthVal) {
+                targetList = targetList.filter(tx => tx.date && tx.date.startsWith(monthVal));
+            }
+
+            if (targetList.length === 0) {
+                showToast('មិនមានទិន្នន័យសម្រាប់ទាញយកទេ!');
+                return;
+            }
+
+            // បន្ថែម UTF-8 BOM (\uFEFF) ដើម្បីឱ្យ Microsoft Excel បង្ហាញអក្សរខ្មែរបានច្បាស់មិនខូចពុម្ពអក្សរ
+            const headers = ['កាលបរិច្ឆេទ', 'កាបូបលុយ', 'ប្រភេទប្រតិបត្តិការ', 'មុខទំនិញ/ប្រភេទ', 'ចំនួនទឹកប្រាក់ដើម', 'រូបិយប័ណ្ណ', 'គិតជាប្រាក់រៀល (៛)', 'គិតជាប្រាក់ដុល្លារ ($)', 'កំណត់ចំណាំ'];
+            const sorted = [...targetList].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const rows = sorted.map(tx => {
+                const walletName = `"${getWallet(tx.walletId).name.replace(/"/g, '""')}"`;
+                const typeLabel = tx.type === 'income' ? 'ចំណូល' : 'ចំណាយ';
+                const catName = getCategory(tx.type, tx.category).name;
+                const valKHR = Math.round(convertMoney(tx.amount, tx.currency, 'KHR'));
+                const valUSD = convertMoney(tx.amount, tx.currency, 'USD').toFixed(2);
+                const safeNote = `"${(tx.note || '').replace(/"/g, '""')}"`;
+                return [tx.date, walletName, typeLabel, catName, tx.amount, tx.currency, valKHR, valUSD, safeNote].join(',');
+            });
+
+            const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const suffix = (onlyCurrentMonth && monthVal) ? monthVal : new Date().toISOString().split('T')[0];
+            a.href = url;
+            a.download = `របាយការណ៍ចំណូលចំណាយ_${suffix}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            showToast(`បានទាញយកឯកសារ Excel (${suffix}) ជោគជ័យ!`);
+        }
+
+        function exportJSON() {
+            const payload = {
+                app: 'KhmerOfflineExpenseTracker',
+                version: 2,
+                exportedAt: new Date().toISOString(),
+                config: { currency: config.currency, rate: config.rate },
+                wallets,
+                transactions
+            };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const today = new Date().toISOString().split('T')[0];
+            a.href = url;
+            a.download = `backup_expense_${today}.json`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            showToast('បានរក្សាទុកឯកសារ Backup JSON ជោគជ័យ!');
+        }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data && Array.isArray(data.transactions)) {
+                        pendingImportData = data;
+                        const wCount = Array.isArray(data.wallets) ? data.wallets.length : 0;
+                        document.getElementById('importSummaryText').textContent =
+                            `រកឃើញប្រតិបត្តិការចំនួន ${data.transactions.length} និងកាបូបលុយចំនួន ${wCount || 1} នៅក្នុងឯកសារនេះ។`;
+                        document.getElementById('importChoiceModal').classList.add('open');
+                    } else {
+                        showToast('ឯកសារ JSON មិនត្រឹមត្រូវទេ!');
+                    }
+                } catch (err) {
+                    showToast('មិនអាចអានឯកសារនេះបានទេ!');
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function closeImportChoiceModal() {
+            pendingImportData = null;
+            document.getElementById('importChoiceModal').classList.remove('open');
+        }
+
+        function executeJsonImport(mode) {
+            if (!pendingImportData) return;
+            const data = pendingImportData;
+
+            if (mode === 'overwrite') {
+                // ជំនួសទាំងស្រុង (Overwrite)
+                if (Array.isArray(data.wallets) && data.wallets.length > 0) {
+                    wallets = data.wallets;
+                } else {
+                    wallets = [...DEFAULT_WALLETS];
+                }
+                transactions = data.transactions.map(tx => ({
+                    ...tx,
+                    walletId: tx.walletId && wallets.some(w => w.id === tx.walletId) ? tx.walletId : wallets[0].id
+                }));
+                if (data.config) {
+                    config.currency = data.config.currency || config.currency;
+                    config.rate = data.config.rate || config.rate;
+                }
+                activeWalletId = 'all';
+                showToast(`បានជំនួសទិន្នន័យថ្មីចំនួន ${transactions.length} ប្រតិបត្តិការ!`);
+            } else {
+                // បូកបញ្ចូលគ្នា (Merge - ការពារកុំឱ្យស្ទួន ID ដដែល)
+                if (Array.isArray(data.wallets)) {
+                    const existingWalletIds = new Set(wallets.map(w => w.id));
+                    data.wallets.forEach(w => {
+                        if (w && w.id && !existingWalletIds.has(w.id)) {
+                            wallets.push(w);
+                            existingWalletIds.add(w.id);
+                        }
+                    });
+                }
+
+                const existingTxIds = new Set(transactions.map(t => t.id));
+                let addedCount = 0;
+                data.transactions.forEach(tx => {
+                    if (tx && tx.id && !existingTxIds.has(tx.id)) {
+                        const validWalletId = tx.walletId && wallets.some(w => w.id === tx.walletId) ? tx.walletId : wallets[0].id;
+                        transactions.push({ ...tx, walletId: validWalletId });
+                        existingTxIds.add(tx.id);
+                        addedCount++;
+                    }
+                });
+                showToast(`បានបូកបញ្ចូលទិន្នន័យថ្មីចំនួន ${addedCount} ប្រតិបត្តិការ (រក្សាទុកទិន្នន័យចាស់)!`);
+            }
+
+            saveStorage();
+            closeImportChoiceModal();
+            updateCurrencyBadge();
+            document.getElementById('exchangeRateInput').value = config.rate;
+            renderWalletBars();
+            renderAll();
+        }
+
+        /* ==========================================================================
+           10. មុខងារជំនួយ & ចាប់ផ្តើមកម្មវិធី (HELPERS & INITIALIZATION)
+           ========================================================================== */
+        let toastTimer = null;
+        function showToast(msg, allowUndo = false) {
+            const toast = document.getElementById('toast');
+            const textEl = document.getElementById('toastText');
+            const undoBtn = document.getElementById('toastUndoBtn');
+
+            textEl.textContent = msg;
+            undoBtn.style.display = allowUndo ? 'inline-block' : 'none';
+            toast.classList.add('show');
+
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, allowUndo ? 4500 : 2800);
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initPWA();
+            loadStorage();
+            document.getElementById('exchangeRateInput').value = config.rate;
+            document.getElementById('monthFilter').value = new Date().toISOString().slice(0, 7);
+            updateCurrencyBadge();
+            initPinState();
+            renderWalletBars();
+            renderAll();
+            renderMonthlyReport();
+        });
+    </script>
+</body>
+</html>
